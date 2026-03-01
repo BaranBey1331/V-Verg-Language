@@ -1,105 +1,190 @@
 <div align="center">
 🚀 V-Verg-Language
 Advanced Tooling, Engine Optimization, and Mobile IDE Integration for the V Programming Language
-🌐 Choose Your Language / Dil Seçin / Wählen Sie Ihre Sprache / Выберите язык / 选择您的语言
+🌐 Select Language
 🇬🇧 English   |   🇹🇷 Türkçe   |   🇩🇪 Deutsch   |   🇷🇺 Русский   |   🇨🇳 中文
+
+
+<hr>
 </div>
 <a id="lang-en"></a> 🇬🇧 English Documentation
-🌟 Comprehensive Overview
-V-Verg-Language is an ambitious, highly optimized ecosystem designed specifically to extend the capabilities of the V Programming Language. While V is globally recognized for its blazingly fast compilation speed and memory safety, developing and optimizing V applications directly on mobile environments (like Android via Termux) has traditionally been a complex challenge.
-This project completely revolutionizes that experience by focusing on three main pillars:
- * Mobile Editor Integration: Seamless coding via the Acode app.
- * Engine Optimization: Custom AST evaluation and memory pool tuning.
- * Advanced Inline Capabilities: Safe wrappers for low-level C macros.
-🚀 Deep Dive into Core Features
- * ⚡ V-Engine Optimizer (v_optimizer.v)
-   * Implements aggressive dead-code elimination before the C backend translation.
-   * Dynamically adjusts the default arena allocator settings to prevent Out-Of-Memory (OOM) errors on resource-constrained Android devices.
-   * Rebuilds the Abstract Syntax Tree (AST) for faster runtime execution.
- * 📱 Acode IDE Integration (acode_v_plugin)
-   * Brings context-aware syntax highlighting directly to the Android Acode editor.
-   * Features a built-in JS bridge that communicates with local background shells (like Termux) to execute v run commands with a single tap.
-   * Maps compiler errors directly to the specific line of code within the editor interface.
- * 🧩 VSupport Plugins (VSupport/src)
-   * Extends the standard [inline] attributes of the V language.
-   * Provides structured, safer environments for embedding raw C code or Assembly instructions directly into your V source files.
-📂 Detailed Repository Structure
-To maintain a modular and scalable architecture, the repository is structured as follows:
-V-Verg-Language/
-│
-├── acode_v_plugin/                      # Mobile IDE Integration Directory
-│   ├── plugin.json                      # Acode plugin metadata and UI registry
-│   └── main.js                          # Core JavaScript bridge for Acode & V CLI
-│
-├── compiler/
-│   └── plugins/
-│       └── VSupport/
-│           └── src/                     # Inline capabilities and compiler hooks
-│               ├── inline_handler.v     # Manages the parsing of inline code blocks
-│               └── support_core.v       # Core extension API
-│
-├── src/                                 
-│   └── v_optimizer.v                    # The core Engine Optimization module
-│
-├── examples/                            # Test cases and practical demo scripts
-│   └── demo_app.v
-│
-├── LICENSE                              # MIT License
-└── README.md                            # This file
+🌟 Project Overview
+V-Verg-Language is a specialized ecosystem built to enhance the V Programming Language. It eliminates the complexities of mobile development and provides deep engine-level optimizations.
+Instead of a complex file structure, this project is divided into specific, highly focused modules. Below is a detailed explanation of every core function and module.
+🛠️ Core Modules & Functions
+1. The Engine Optimizer (v_optimizer.v)
+This module is responsible for making your V code run faster and consume less memory, especially on constrained devices like Android phones.
+ * optimize_ast(mut tree ASTNode)
+   Analyzes the Abstract Syntax Tree (AST) before compilation. It finds inefficiencies and restructures the nodes for faster execution.
+ * eliminate_dead_code()
+   Scans the entire project for variables, functions, or imports that are declared but never used. It strips these out entirely before the C translation phase.
+ * tune_memory_pool(profile: .mobile)
+   Adjusts V's default arena allocator. By using the .mobile profile, it prevents aggressive memory grabs, avoiding Out-Of-Memory (OOM) crashes on Android via Termux.
+2. Mobile IDE Integration (acode_v_plugin)
+We bring a full V development environment to your phone using the Acode app.
+ * Syntax & Context Highlighting
+   The plugin understands V syntax perfectly. It colors keywords, types, and functions dynamically as you type on your mobile keyboard.
+ * One-Tap Compile & Run Bridge
+   A hidden JavaScript bridge communicates with your background shell (like Termux). You press one button in Acode, and the plugin executes v run your_file.v silently, showing the output in the editor.
+ * Real-time Error Mapping
+   If the compiler throws an error, the plugin catches the exact line number from the terminal output and highlights the broken code line directly inside Acode.
+3. Advanced Inline Capabilities (VSupport)
+This module gives you safer, structured access to low-level system operations.
+ * handle_c_macro(macro_string string)
+   Allows you to securely embed complex C macros directly into your V code without breaking the V parser.
+ * inject_assembly(arch string, code string)
+   A structured wrapper for injecting raw Assembly instructions specifically targeted at either ARM (mobile) or x86 architectures.
+🚀 Installation Guide
+Desktop (Linux/macOS/Windows):
+git clone [https://github.com/BaranBey1331/V-Verg-Language.git](https://github.com/BaranBey1331/V-Verg-Language.git)
 
-🛠️ Step-by-Step Installation
-1. Standard Desktop Setup (Linux / macOS / Windows)
-# Clone the repository
-git clone https://github.com/BaranBey1331/V-Verg-Language.git
-
-# Enter the directory
-cd V-Verg-Language
-
-# Move the optimizer to your local V source directory
-cp src/v_optimizer.v /path/to/v/src/
-
-# Test the installation with a demo script
-v run examples/demo_app.v
-
-2. Mobile Setup (Android via Termux & Acode)
-# First, open Termux and install the necessary packages
+Mobile (Android via Termux):
 pkg install v git
-
-# Navigate to your shared internal storage
 cd /storage/emulated/0/Download/
+git clone [https://github.com/BaranBey1331/V-Verg-Language.git](https://github.com/BaranBey1331/V-Verg-Language.git)
 
-# Clone the project directly into your phone's storage
-git clone https://github.com/BaranBey1331/V-Verg-Language.git
+(Install the acode_v_plugin folder via Acode Settings -> Plugins -> Install from folder)
 
- * Activating the Acode Plugin:
-   * Open the Acode app on your Android device.
-   * Navigate to Settings -> Plugins.
-   * Select Install from folder.
-   * Browse to /storage/emulated/0/Download/V-Verg-Language/acode_v_plugin and select it.
-   * Restart the Acode application to apply the syntax rules and terminal hooks.
-💻 Practical Code Example
-Here is how you can implement the V-Verg optimizer in your daily V projects:
-import optimizer
 
-fn main() {
-    println('[INFO] Initializing V-Verg Engine...')
-    
-    // Initialize the custom optimizer with the mobile profile
-    // This will limit memory allocation spikes
-    mut opt := optimizer.new_optimizer(profile: .mobile)
-    
-    // Run the optimization pass on the current AST
-    opt.run_pass()
-    
-    println('[SUCCESS] Optimization complete. Running main logic.')
-}
 
-❓ Troubleshooting & FAQ
-Q: The Acode plugin says "Invalid plugin.json". What should I do?
-> A: Ensure you are selecting the specific acode_v_plugin directory, NOT the root repository folder. Acode expects the plugin.json to be at the exact root of the chosen folder.
-> 
-Q: Why do I get "Permission Denied" errors when compiling in Termux?
-> A: Termux needs explicit permission to read/write to your Android storage. Run termux-setup-storage in your terminal and accept the Android permission prompt.
+
+<hr>
+<a id="lang-tr"></a> 🇹🇷 Türkçe Dokümantasyon
+🌟 Proje Genel Bakışı
+V-Verg-Language, V Programlama Dilini geliştirmek için oluşturulmuş özel bir ekosistemdir. Mobil geliştirmenin karmaşıklıklarını ortadan kaldırır ve derin motor (engine) seviyesinde optimizasyonlar sunar.
+Karmaşık bir dosya yapısı yerine, bu proje belirli ve son derece odaklanmış modüllere bölünmüştür. Aşağıda her bir temel fonksiyonun ve modülün detaylı açıklaması yer almaktadır.
+🛠️ Temel Modüller ve Fonksiyonlar
+1. Motor Optimize Edici (v_optimizer.v)
+Bu modül, V kodunuzun özellikle Android telefonlar gibi kısıtlı cihazlarda daha hızlı çalışmasını ve daha az bellek tüketmesini sağlamaktan sorumludur.
+ * optimize_ast(mut tree ASTNode)
+   Derlemeden önce Soyut Sözdizimi Ağacını (AST) analiz eder. Verimsizlikleri bulur ve daha hızlı yürütme için düğümleri (nodes) yeniden yapılandırır.
+ * eliminate_dead_code()
+   Tüm projeyi tanımlanmış ancak hiç kullanılmamış değişkenler, fonksiyonlar veya içe aktarmalar (imports) için tarar. C çeviri aşamasından önce bunları tamamen temizler.
+ * tune_memory_pool(profile: .mobile)
+   V'nin varsayılan arena bellek tahsis edicisini ayarlar. .mobile profilini kullanarak agresif bellek alımlarını engeller ve Termux üzerinden Android'de yetersiz bellek (OOM) çökmelerini önler.
+2. Mobil IDE Entegrasyonu (acode_v_plugin)
+Acode uygulamasını kullanarak telefonunuza tam bir V geliştirme ortamı getiriyoruz.
+ * Sözdizimi ve Bağlam Vurgulama
+   Eklenti, V sözdizimini mükemmel bir şekilde anlar. Mobil klavyenizde yazarken anahtar kelimeleri, türleri ve fonksiyonları dinamik olarak renklendirir.
+ * Tek Dokunuşla Derle ve Çalıştır Köprüsü
+   Gizli bir JavaScript köprüsü, arka plan kabuğunuzla (Termux gibi) iletişim kurar. Acode'da bir düğmeye basarsınız ve eklenti sessizce v run dosyaniz.v komutunu çalıştırarak çıktıyı editörde gösterir.
+ * Gerçek Zamanlı Hata Eşleme
+   Derleyici bir hata verirse, eklenti terminal çıktısından tam satır numarasını yakalar ve doğrudan Acode içinde hatalı kod satırını vurgular.
+3. Gelişmiş Satıriçi (Inline) Yetenekleri (VSupport)
+Bu modül size düşük seviyeli sistem operasyonlarına daha güvenli, yapılandırılmış erişim sağlar.
+ * handle_c_macro(macro_string string)
+   Karmaşık C makrolarını, V ayrıştırıcısını (parser) bozmadan doğrudan V kodunuza güvenli bir şekilde gömmenizi sağlar.
+ * inject_assembly(arch string, code string)
+   Özellikle ARM (mobil) veya x86 mimarilerini hedefleyen ham Assembly talimatlarını enjekte etmek için yapılandırılmış bir sarmalayıcı (wrapper).
+🚀 Kurulum Rehberi
+Masaüstü (Linux/macOS/Windows):
+git clone [https://github.com/BaranBey1331/V-Verg-Language.git](https://github.com/BaranBey1331/V-Verg-Language.git)
+
+Mobil (Termux üzerinden Android):
+pkg install v git
+cd /storage/emulated/0/Download/
+git clone [https://github.com/BaranBey1331/V-Verg-Language.git](https://github.com/BaranBey1331/V-Verg-Language.git)
+
+(Acode Ayarları -> Eklentiler -> Klasörden yükle üzerinden acode_v_plugin klasörünü yükleyin)
+
+
+
+
+<hr>
+<a id="lang-de"></a> 🇩🇪 Deutsch Dokumentation
+🌟 Projektübersicht
+V-Verg-Language ist ein spezialisiertes Ökosystem, das zur Verbesserung der V-Programmiersprache entwickelt wurde. Es beseitigt die Komplexität der mobilen Entwicklung und bietet tiefe Optimierungen auf Engine-Ebene.
+Anstelle einer komplexen Dateistruktur ist dieses Projekt in spezifische, hochfokussierte Module unterteilt. Nachfolgend finden Sie eine detaillierte Erklärung aller Kernfunktionen und Module.
+🛠️ Kernmodule & Funktionen
+1. Der Engine Optimizer (v_optimizer.v)
+Dieses Modul ist dafür verantwortlich, dass Ihr V-Code schneller ausgeführt wird und weniger Speicher verbraucht, insbesondere auf eingeschränkten Geräten wie Android-Telefonen.
+ * optimize_ast(mut tree ASTNode)
+   Analysiert den abstrakten Syntaxbaum (AST) vor der Kompilierung. Es findet Ineffizienzen und strukturiert die Knoten für eine schnellere Ausführung um.
+ * eliminate_dead_code()
+   Durchsucht das gesamte Projekt nach Variablen, Funktionen oder Importen, die deklariert, aber nie verwendet wurden. Diese werden vor der C-Übersetzungsphase vollständig entfernt.
+ * tune_memory_pool(profile: .mobile)
+   Passt den standardmäßigen Arena-Allocator von V an. Durch Verwendung des Profils .mobile werden aggressive Speicherzugriffe verhindert und Out-Of-Memory (OOM)-Abstürze vermieden.
+2. Mobile IDE Integration (acode_v_plugin)
+Wir bringen eine vollständige V-Entwicklungsumgebung mit der Acode-App auf Ihr Telefon.
+ * Syntax- & Kontexthervorhebung
+   Das Plugin versteht die V-Syntax perfekt. Es färbt Schlüsselwörter, Typen und Funktionen dynamisch ein.
+ * One-Tap Kompilieren & Ausführen
+   Eine versteckte JavaScript-Brücke kommuniziert mit Ihrer Hintergrund-Shell (wie Termux). Sie drücken eine Taste und das Plugin führt v run im Hintergrund aus.
+ * Echtzeit-Fehlerzuordnung
+   Wenn der Compiler einen Fehler ausgibt, fängt das Plugin die genaue Zeilennummer ab und markiert die fehlerhafte Codezeile direkt in Acode.
+3. Erweiterte Inline-Funktionen (VSupport)
+Dieses Modul bietet Ihnen einen sichereren, strukturierten Zugriff auf systemnahe Operationen.
+ * handle_c_macro(macro_string string)
+   Ermöglicht die sichere Einbettung komplexer C-Makros direkt in Ihren V-Code.
+ * inject_assembly(arch string, code string)
+   Ein strukturierter Wrapper zum Injizieren von rohen Assembly-Anweisungen, gezielt für ARM (mobil) oder x86-Architekturen.
+
+
+
+
+<hr>
+<a id="lang-ru"></a> 🇷🇺 Русский Документация
+🌟 Обзор проекта
+V-Verg-Language — это специализированная экосистема, созданная для улучшения языка программирования V. Она устраняет сложности мобильной разработки и обеспечивает глубокую оптимизацию на уровне движка.
+Вместо сложной файловой структуры этот проект разделен на конкретные модули. Ниже приведено подробное объяснение всех основных функций и модулей.
+🛠️ Основные модули и функции
+1. Оптимизатор движка (v_optimizer.v)
+Этот модуль отвечает за то, чтобы ваш код V работал быстрее и потреблял меньше памяти, особенно на таких устройствах, как телефоны Android.
+ * optimize_ast(mut tree ASTNode)
+   Анализирует абстрактное синтаксическое дерево (AST) перед компиляцией. Находит неэффективности и реструктурирует узлы для более быстрого выполнения.
+ * eliminate_dead_code()
+   Сканирует весь проект на наличие переменных, функций или импортов, которые объявлены, но никогда не используются. Полностью удаляет их перед фазой перевода на C.
+ * tune_memory_pool(profile: .mobile)
+   Настраивает распределитель памяти V по умолчанию. Использование профиля .mobile предотвращает сбои из-за нехватки памяти (OOM).
+2. Интеграция мобильной IDE (acode_v_plugin)
+Мы переносим полноценную среду разработки V на ваш телефон с помощью приложения Acode.
+ * Подсветка синтаксиса
+   Плагин идеально понимает синтаксис V. Он динамически раскрашивает ключевые слова и типы.
+ * Компиляция и запуск в одно касание
+   Скрытый мост JavaScript связывается с вашей фоновой оболочкой (например, Termux). Вы нажимаете кнопку, и плагин незаметно выполняет v run.
+ * Отображение ошибок в реальном времени
+   Если компилятор выдает ошибку, плагин перехватывает точный номер строки и выделяет поврежденную строку кода прямо в Acode.
+3. Расширенные встроенные функции (VSupport)
+Этот модуль дает вам безопасный, структурированный доступ к низкоуровневым системным операциям.
+ * handle_c_macro(macro_string string)
+   Позволяет безопасно встраивать сложные макросы C прямо в ваш код V.
+ * inject_assembly(arch string, code string)
+   Структурированная оболочка для внедрения необработанных инструкций Assembly.
+
+
+
+
+<hr>
+<a id="lang-zh"></a> 🇨🇳 中文 文档
+🌟 项目概述
+V-Verg-Language 是一个专门构建的生态系统，用于增强 V 编程语言。它消除了移动开发的复杂性，并提供了深入引擎级别的优化。
+本项目没有复杂的文件结构，而是划分为特定且高度专注的模块。下面是所有核心功能和模块的详细说明。
+🛠️ 核心模块与功能
+1. 引擎优化器 (v_optimizer.v)
+此模块负责使您的 V 代码运行得更快，消耗的内存更少，尤其是在 Android 手机等受限设备上。
+ * optimize_ast(mut tree ASTNode)
+   在编译之前分析抽象语法树 (AST)。它会发现效率低下的地方并重组节点以加快执行速度。
+ * eliminate_dead_code()
+   扫描整个项目，查找已声明但从未使用过的变量、函数或导入。在 C 翻译阶段之前将它们完全剥离。
+ * tune_memory_pool(profile: .mobile)
+   调整 V 的默认 arena 分配器。通过使用 .mobile 配置文件，可以防止严重的内存占用，避免内存不足 (OOM) 崩溃。
+2. 移动 IDE 集成 (acode_v_plugin)
+我们使用 Acode 应用程序将完整的 V 开发环境带到您的手机上。
+ * 语法和上下文高亮
+   该插件完美理解 V 语法。它会在您键入时动态地对关键字、类型和函数进行着色。
+ * 一键编译和运行桥接
+   一个隐藏的 JavaScript 桥接器与您的后台 shell（如 Termux）通信。您在 Acode 中按下一个按钮，插件就会静默执行 v run。
+ * 实时错误映射
+   如果编译器抛出错误，该插件会捕获确切的行号，并直接在 Acode 内高亮显示损坏的代码行。
+3. 高级内联功能 (VSupport)
+该模块为您提供了对底层系统操作的更安全、结构化的访问。
+ * handle_c_macro(macro_string string)
+   允许您安全地将复杂的 C 宏直接嵌入到您的 V 代码中，而不会破坏 V 解析器。
+ * inject_assembly(arch string, code string)
+   用于注入原始汇编指令的结构化包装器，专门针对 ARM（移动）或 x86 架构。
+<div align="center">
+<p><b>Built with ❤️ by the V-Verg-Language Open Source Community.</b></p>
+</div>
 > 
 🤝 Contributing Guidelines
 We welcome all contributions! To help us improve:
