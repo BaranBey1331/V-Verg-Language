@@ -1,1 +1,66 @@
+name: V Project Release
 
+on:
+  push:
+    tags:
+      - 'v*' # Github'a v1.0.0 gibi bir tag pushlandığında tetiklenir
+  workflow_dispatch: # Actions sekmesinden manuel tetiklemek için
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Repoyu Klonla
+        uses: actions/checkout@v4
+
+      - name: Projeyi Paketle
+        run: |
+          # V projesinin dosyalarını paketle (kendi yapına göre burayı düzenleyebilirsin)
+          mkdir -p release_build
+          # Örnek: Tüm dosyaları build klasörüne kopyala
+          rsync -av --exclude='.git' --exclude='.github' ./ release_build/
+          tar -czvf v-project-v1.0.0.tar.gz -C release_build .
+
+      - name: Termux / cURL / Wget İçin Kurulum Betiği Hazırla
+        run: |
+          echo '#!/bin/bash' > install.sh
+          echo 'echo "V Projesi (v1.0.0) İndiriliyor..."' >> install.sh
+          echo 'if command -v curl >/dev/null 2>&1; then' >> install.sh
+          echo '  curl -LO https://github.com/${{ github.repository }}/releases/download/v1.0.0/v-project-v1.0.0.tar.gz' >> install.sh
+          echo 'elif command -v wget >/dev/null 2>&1; then' >> install.sh
+          echo '  wget https://github.com/${{ github.repository }}/releases/download/v1.0.0/v-project-v1.0.0.tar.gz' >> install.sh
+          echo 'else' >> install.sh
+          echo '  echo "Hata: curl veya wget bulunamadı! Lütfen Termux üzerinde pkg install curl wget yazarak kurun." && exit 1' >> install.sh
+          echo 'fi' >> install.sh
+          echo 'tar -xvf v-project-v1.0.0.tar.gz' >> install.sh
+          echo 'echo "V Projesi kurulumu tamamlandı!"' >> install.sh
+          chmod +x install.sh
+
+      - name: V1.0.0 Sürümünü Oluştur ve Yayınla
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: V Projesi Release v1.0.0
+          body: |
+            🎉 **V Projesi İlk Sürümü (v1.0.0)** yayınlandı!
+            
+            ### Termux veya Linux Üzerinde Kurulum
+            Projeyi cihazınıza indirmek ve kurmak için terminalinizde aşağıdaki komutlardan birini çalıştırın:
+            
+            **cURL kullanarak (Önerilen):**
+            ```bash
+            curl -sSL [https://github.com/$](https://github.com/$){{ github.repository }}/releases/download/v1.0.0/install.sh | bash
+            ```
+            
+            **Wget kullanarak:**
+            ```bash
+            wget -qO- [https://github.com/$](https://github.com/$){{ github.repository }}/releases/download/v1.0.0/install.sh | bash
+            ```
+          draft: false
+          prerelease: false
+          files: |
+            v-project-v1.0.0.tar.gz
+            install.sh
