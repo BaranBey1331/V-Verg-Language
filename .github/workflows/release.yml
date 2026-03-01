@@ -3,106 +3,109 @@ name: V-Verg-Language Release
 on:
   push:
     tags:
-      - 'v*' # v1.0.0 gibi bir tag ile tetiklenir
+      - 'v*' # Sadece v ile başlayan tag'ler atıldığında çalışır (v1.0.0, v2.1.0 vb.)
   workflow_dispatch:
+
+permissions:
+  contents: write # Gerçek bir release oluşturmak için zorunlu yetki
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Repoyu Klonla
         uses: actions/checkout@v4
 
-      # OTOMATİK ÇEVİRİ (DERLEME) ADIMI
+      - name: Versiyon Bilgisini Yakala
+        id: get_version
+        run: |
+          # Eğer bir tag pushlandıysa o tagı al, manuel tetiklendiyse dev versiyonu ata
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=v0.0.0-dev" >> $GITHUB_ENV
+          fi
+
       - name: Projeyi Derle / Çevir
         run: |
           echo "Otomatik çeviri ve derleme işlemi başlatılıyor..."
-          # Not: Eğer V-Verg dilini derlemek için bir komutun varsa buraya yaz.
-          # Örnek: gcc main.c -o v-verg veya python setup.py build vb.
-          # Şimdilik klasörü hazırlıyoruz:
           mkdir -p release_build
           rsync -av --exclude='.git' --exclude='.github' ./ release_build/
 
-      - name: Projeyi Paketle (.zip ve .tar.gz)
+      - name: Projeyi Paketle
         run: |
           cd release_build
-          # ZIP Olarak Paketle
-          zip -r ../V-Verg-Language-v1.0.0.zip .
-          # TAR.GZ Olarak Paketle
-          tar -czvf ../V-Verg-Language-v1.0.0.tar.gz .
+          zip -r ../V-Verg-Language-${{ env.VERSION }}.zip .
+          tar -czvf ../V-Verg-Language-${{ env.VERSION }}.tar.gz .
           cd ..
 
-      - name: Akıllı Termux / Wget / cURL Kurulum Betiği Hazırla
+      - name: Pro Seviye Akıllı Kurulum Betiği Hazırla (install.sh)
         run: |
           cat << 'EOF' > install.sh
           #!/bin/bash
-          echo "V-Verg-Language İndiriliyor..."
-          
+          set -e # Herhangi bir komut hata verirse kurulumu durdur
+
           REPO="BaranBey1331/V-Verg-Language"
-          VERSION="v1.0.0"
+          # Workflow çalışırken bu değişken o anki sürüme (örn: v1.0.0) dönüşecek
+          VERSION="${{ env.VERSION }}"
           
-          # İndirme Linkleri
+          echo "🚀 V-Verg-Language ($VERSION) Kurulumu Başlıyor..."
+
           RELEASE_URL="https://github.com/$REPO/releases/download/$VERSION/V-Verg-Language-$VERSION.zip"
           MAIN_REPO_URL="https://github.com/$REPO/archive/refs/heads/main.zip"
           
-          # İndirme Fonksiyonu (cURL veya Wget otomatik seçilir)
           download_file() {
-            if command -v wget >/dev/null 2>&1; then
+            if command -v curl >/dev/null 2>&1; then
+              curl -fsSL "$1" -o v-project.zip
+              return $?
+            elif command -v wget >/dev/null 2>&1; then
               wget -qO v-project.zip "$1"
               return $?
-            elif command -v curl >/dev/null 2>&1; then
-              curl -sL "$1" -o v-project.zip
-              return $?
             else
-              echo "Hata: curl veya wget bulunamadı! Lütfen Termux'ta 'pkg install curl wget unzip' çalıştırın."
+              echo "❌ Hata: curl veya wget bulunamadı! Lütfen kurun (örn: pkg install curl wget unzip)"
               exit 1
             fi
           }
           
-          # 1. Önce Release sürümünü çekmeyi dene
-          echo "Release sürümü (v1.0.0) aranıyor..."
+          echo "📦 Sürüm dosyaları indiriliyor..."
           if download_file "$RELEASE_URL" && [ -s v-project.zip ]; then
-            echo "Release başarıyla indirildi!"
+            echo "✅ Release sürümü başarıyla indirildi!"
           else
-            # 2. Eğer Release yoksa veya hata verirse Normal Github Adresini çek
-            echo "Release bulunamadı, normal GitHub adresinden (main) güncel kodlar çekiliyor..."
+            echo "⚠️ Release arşivi bulunamadı, ana repodan en güncel kodlar çekiliyor..."
             download_file "$MAIN_REPO_URL"
           fi
           
-          echo "Arşiv çıkartılıyor..."
+          echo "📂 Arşiv çıkartılıyor..."
           if command -v unzip >/dev/null 2>&1; then
             unzip -q -o v-project.zip -d V-Verg-Language
           else
-            echo "Hata: unzip bulunamadı! Lütfen kurun: pkg install unzip"
+            echo "❌ Hata: unzip bulunamadı! Lütfen kurun: pkg install unzip"
             exit 1
           fi
           
-          rm v-project.zip
-          echo "Kurulum tamamlandı! Dosyalar 'V-Verg-Language' klasöründe."
+          rm -f v-project.zip
+          echo "🎉 Kurulum tamamlandı! Projeye girmek için: cd V-Verg-Language"
           EOF
           chmod +x install.sh
 
       - name: Workflow Artifact Olarak Yükle
         uses: actions/upload-artifact@v4
         with:
-          name: V-Verg-Language-v1.0.0-builds
+          name: V-Verg-Language-${{ env.VERSION }}-builds
           path: |
-            V-Verg-Language-v1.0.0.zip
-            V-Verg-Language-v1.0.0.tar.gz
+            V-Verg-Language-${{ env.VERSION }}.zip
+            V-Verg-Language-${{ env.VERSION }}.tar.gz
             install.sh
           retention-days: 90
 
-      - name: V1.0.0 Sürümünü Yayınla (Release)
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.0
-          name: V-Verg-Language Release v1.0.0
-          draft: false
-          prerelease: false
-          files: |
-            V-Verg-Language-v1.0.0.zip
-            V-Verg-Language-v1.0.0.tar.gz
-            install.sh
+      - name: Gerçek GitHub Release Oluştur ve Yayınla
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ env.VERSION }} \
+            V-Verg-Language-${{ env.VERSION }}.zip \
+            V-Verg-Language-${{ env.VERSION }}.tar.gz \
+            install.sh \
+            --title "V-Verg-Language Release ${{ env.VERSION }}" \
+            --generate-notes
