@@ -1,0 +1,55 @@
+{
+  "name": "VTML",
+  "scopeName": "text.html.vtml",
+  "fileTypes": ["vtml"],
+  "patterns": [
+    {
+      "name": "meta.tag.vtml",
+      "begin": "(<)([a-zA-Z0-9\\-]+)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.vtml" },
+        "2": { "name": "entity.name.tag.vtml" }
+      },
+      "end": "(/?>)",
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.tag.end.vtml" }
+      },
+      "patterns": [
+        {
+          "name": "entity.other.attribute-name.vtml",
+          "match": "\\b([a-zA-Z\\-]+)(?=\\=)"
+        },
+        {
+          "name": "entity.other.attribute-name.event.vtml",
+          "match": "(@[a-zA-Z\\-]+)",
+          "comment": "V-Engine Ozel Event'leri (Orn: @click, @hover)"
+        },
+        {
+          "name": "entity.other.attribute-name.bind.vtml",
+          "match": "(:[a-zA-Z\\-]+)",
+          "comment": "V-Engine Dinamik Veri Baglama (Orn: :class, :value)"
+        },
+        {
+          "name": "string.quoted.double.vtml",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "variable.parameter.vtml",
+              "match": "\\{\\{.*?\\}\\}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "variable.parameter.vtml",
+      "match": "\\{\\{.*?\\}\\}",
+      "comment": "VTML Dinamik Degiskenleri"
+    },
+    {
+      "name": "keyword.control.vtml",
+      "match": "\\b(if|else|for|while|var|let|const)\\b"
+    }
+  ]
+}
