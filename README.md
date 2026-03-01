@@ -94,6 +94,8 @@ V-Verg-Language/
  * Aşama 2 (Aktif): acode_v_plugin üzerinden gelen anlık hata ayıklama (debugging) bildirimlerinin optimizasyonu ve mobil UI tepki sürelerinin iyileştirilmesi.
  * Aşama 3 (Planlanan): V-Engine içerisine yapay zeka destekli, kodun yürütme yollarını analiz edip otomatik inline kararları verebilen analitik bir alt sistemin entegre edilmesi.
  * Aşama 4 (Gelecek): Eğitim kurumlarında ortak ağ üzerinden öğrencilerin kodlarını merkezi bir V-Engine üzerinde çalıştırıp anlık performans karşılaştırmaları yapabileceği "Sınıf Modu" (Classroom Mode) entegrasyonu.
+
+
 <a id="russian-section"></a>
 🇷🇺 РУССКИЙ (RUSSIAN TRANSLATION)
 Добро пожаловать в официальный репозиторий V-Verg-Language. Этот проект представляет собой наш собственный, специально разработанный язык V, который оставляет позади ограничения традиционных архитектур компиляторов и стандартных языков программирования. Наша система напрямую взаимодействует с аппаратным обеспечением и мобильными средами разработки.
